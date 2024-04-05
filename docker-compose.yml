@@ -1,0 +1,37 @@
+version: "2"
+
+services:
+    mongod:
+        container_name: mongod
+        image: mongodb/mongodb-enterprise-server:7.0-ubi8
+        entrypoint: "/bin/sh -c \"echo \"$$KEYFILECONTENTS\" > \"$$KEYFILE\"\n\nchmod 400 \"$$KEYFILE\"\n\n\npython3 /usr/local/bin/docker-entrypoint.py mongod --transitionToAuth --keyFile \"$$KEYFILE\" --replSet \"$$REPLSETNAME\" --setParameter \"mongotHost=$$MONGOTHOST\" --setParameter \"searchIndexManagementHostAndPort=$$MONGOTHOST\"\""
+        environment:
+            MONGOTHOST: 10.6.0.6:27027
+            KEYFILE: /data/db/keyfile
+            KEYFILECONTENTS: sup3rs3cr3tk3y
+            REPLSETNAME: local
+        ports:
+            - 27017:27017
+        networks:
+            network:
+                ipv4_address: 10.6.0.5
+    mongot:
+        container_name: mongot
+        image: mongodb/mongodb-atlas-search:preview
+        entrypoint: "/bin/sh -c \"echo \"$$KEYFILECONTENTS\" > \"$$KEYFILE\"\n\n/etc/mongot-localdev/mongot  --mongodHostAndPort \"$$MONGOD_HOST_AND_PORT\" --keyFile \"$$KEYFILE\"\""
+        environment:
+            MONGOD_HOST_AND_PORT: 10.6.0.5:27017
+            KEYFILE: /var/lib/mongot/keyfile
+            KEYFILECONTENTS: sup3rs3cr3tk3y
+        ports:
+            - 27027:27027
+        networks:
+            network:
+                ipv4_address: 10.6.0.6
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.6.0.0/16
+          gateway: 10.6.0.1
