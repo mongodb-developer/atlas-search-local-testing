@@ -23,6 +23,6 @@
     "dependencies": {
         "@typegoose/typegoose": "^12.2.0",
         "mongodb": "^6.5.0",
-        "mongoose": "^8.2.4"
+        "mongoose": "^8.9.5"
     }
 }
